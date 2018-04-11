@@ -2,7 +2,8 @@
 import theano
 import theano.tensor as T
 import numpy
-import cPickle
+import pickle
+# import cPickle
 
 def randMatrix(rng, shape, lim):
     return numpy.asarray(
@@ -53,22 +54,39 @@ class LSTMLayer(object):
             bc = theano.shared(value=bc_values, name='bc', borrow=True)
 
         else:
-            f = file(prefix + name + '.save', 'rb')
-            Wi1 = cPickle.load(f)
-            Wi2 = cPickle.load(f)
-            bi = cPickle.load(f)
+            # f = file(prefix + name + '.save', 'rb')
+            f = open(prefix + name + '.save', 'rb')
+            # Wi1 = cPickle.load(f)
+            # Wi2 = cPickle.load(f)
+            # bi = cPickle.load(f)
 
-            Wo1 = cPickle.load(f)
-            Wo2 = cPickle.load(f)
-            bo = cPickle.load(f)
+            # Wo1 = cPickle.load(f)
+            # Wo2 = cPickle.load(f)
+            # bo = cPickle.load(f)
 
-            Wf1 = cPickle.load(f)
-            Wf2 = cPickle.load(f)
-            bf = cPickle.load(f)
+            # Wf1 = cPickle.load(f)
+            # Wf2 = cPickle.load(f)
+            # bf = cPickle.load(f)
 
-            Wc1 = cPickle.load(f)
-            Wc2 = cPickle.load(f)
-            bc = cPickle.load(f)
+            # Wc1 = cPickle.load(f)
+            # Wc2 = cPickle.load(f)
+            # bc = cPickle.load(f)
+            
+            Wi1 = pickle.load(f)
+            Wi2 = pickle.load(f)
+            bi = pickle.load(f)
+
+            Wo1 = pickle.load(f)
+            Wo2 = pickle.load(f)
+            bo = pickle.load(f)
+
+            Wf1 = pickle.load(f)
+            Wf2 = pickle.load(f)
+            bf = pickle.load(f)
+
+            Wc1 = pickle.load(f)
+            Wc2 = pickle.load(f)
+            bc = pickle.load(f)
 
             f.close()
 
@@ -111,8 +129,8 @@ class LSTMLayer(object):
 
         self.output = outs[1]
         # self.special = special
-        print 'LSTMLayer'
-        print self.output.shape
+        print('LSTMLayer')
+        print(self.output.shape)
 
         self.params = [self.Wi1, self.Wi2, self.bi, self.Wo1, self.Wo2, self.bo,
             self.Wf1, self.Wf2, self.bf, self.Wc1, self.Wc2, self.bc]
@@ -120,5 +138,6 @@ class LSTMLayer(object):
     def save(self, prefix):
         f = file(prefix + self.name + '.save', 'wb')
         for obj in self.params:
-            cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
+            pickle.dump(obj, f)
+            # cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
         f.close()

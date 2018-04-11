@@ -5,7 +5,8 @@ from HiddenLayer import HiddenLayer
 from Update import AdaUpdates
 from PoolLayer import *
 from SentenceSortLayer import *
-import cPickle
+# import cPickle
+import pickle
 import theano
 import theano.tensor as T
 import numpy
@@ -48,8 +49,8 @@ class LSTMModel(object):
         docrepresentation = layers[5].output
 
         pred = T.argmax(layers[-1].output, axis=1)
-        cost = -T.mean(T.log(layers[-1].output)[T.arange(label.shape[0]), label], acc_dtype='float32')
-        correct = T.sum(T.eq(T.argmax(layers[-1].output, axis=1), label), acc_dtype='int32')
+        cost = -T.mean(T.log(layers[-1].output)[T.arange(label.shape[0]), label], dtype='float32')
+        correct = T.sum(T.eq(T.argmax(layers[-1].output, axis=1), label), dtype='int32')
         err = T.argmax(layers[-1].output, axis=1) - label
         mse = T.sum(err * err)
         
@@ -58,7 +59,7 @@ class LSTMModel(object):
             params += layer.params
         L2_rate = numpy.float32(1e-5)
         for param in params[1:]:
-            cost += T.sum(L2_rate * (param * param), acc_dtype='float32')
+            cost += T.sum(L2_rate * (param * param), dtype='float32')
         gparams = [T.grad(cost, param) for param in params]
 
         updates = AdaUpdates(params, gparams, 0.95, 1e-6)
@@ -79,18 +80,20 @@ class LSTMModel(object):
         n = 0
         for i in lst:
             n += 1
-            # print 'docs shape:'
-            # print numpy.shape(self.trainset.docs[i])
-            # #print 'expandlen shape:'
-            # #print numpy.shape(self.trainset.expandlen[i])
-            # print 'label shape:'
-            # print numpy.shape(self.trainset.label[i])
-            # print 'wordmask shape:'
-            # print numpy.shape(self.trainset.wordmask[i])
-            # print 'sentencemask shape:'
-            # print numpy.shape(self.trainset.sentencemask[i])
-            # print 'maxsentencenum shape:'
-            # print numpy.shape(self.trainset.maxsentencenum[i])
+            print('docs shape:')
+            print(numpy.shape(self.trainset.docs[i]))
+            #print 'expandlen shape:'
+            #print numpy.shape(self.trainset.expandlen[i])
+            print('label shape:')
+            print(numpy.shape(self.trainset.label[i]))
+            print('sentencenum')
+            print(numpy.shape(self.trainset.sentencenum[i]))
+            print('wordmask shape:')
+            print(numpy.shape(self.trainset.wordmask[i]))
+            print('sentencemask shape:')
+            print(numpy.shape(self.trainset.sentencemask[i]))
+            print('maxsentencenum shape:')
+            print(numpy.shape(self.trainset.maxsentencenum[i]))
             [out, docrepresentation] = self.train_model(self.trainset.docs[i], self.trainset.label[i], self.trainset.length[i],self.trainset.sentencenum[i],self.trainset.wordmask[i],self.trainset.sentencemask[i],self.trainset.maxsentencenum[i])
             # print n, 'cost:',out
             # print 'docrepresen, shape: ', numpy.shape(docrepresentation)
@@ -109,7 +112,7 @@ class LSTMModel(object):
             tot += len(self.testset.label[i])
             self.doc_emb_test[i*16:(i+1)*16,:] = tmp[2]
             self.pred_test[i*16:(i+1)*16] = tmp[3]
-        print 'Accuracy:',float(cor)/float(tot),'RMSE:',numpy.sqrt(float(mis)/float(tot))
+        print('Accuracy:',float(cor)/float(tot),'RMSE:',numpy.sqrt(float(mis)/float(tot)))
         return cor, mis, tot
 
 
@@ -118,26 +121,60 @@ class LSTMModel(object):
         for layer in self.layers:
             layer.save(prefix)
     
-    def save_doc_emb(self, doc_emb):
-        f = file('../nsc_emb_doc_train.save', 'wb')
-        cPickle.dump(doc_emb, f, protocol=cPickle.HIGHEST_PROTOCOL)
-        f.close()
-        print '-> saved doc embedding training'
+    # def save_doc_emb(self, doc_emb):
+    #     f = file('../nsc_emb_doc_train.save', 'wb')
+    #     cPickle.dump(doc_emb, f, protocol=cPickle.HIGHEST_PROTOCOL)
+    #     f.close()
+    #     print('-> saved doc embedding training')
         
-    def save_doc_emb_test(self, doc_emb):
-        f = file('../nsc_emb_doc_test.save', 'wb')
-        cPickle.dump(doc_emb, f, protocol=cPickle.HIGHEST_PROTOCOL)
+    # def save_doc_emb_test(self, doc_emb):
+    #     f = file('../nsc_emb_doc_test.save', 'wb')
+    #     cPickle.dump(doc_emb, f, protocol=cPickle.HIGHEST_PROTOCOL)
+    #     f.close()
+    #     print('-> saved doc embedding testing')
+
+    # def save_pred_test(self, result):
+    #     f = file('../nsc_pred_test_lstm.save', 'wb')
+    #     cPickle.dump(result, f, protocol=cPickle.HIGHEST_PROTOCOL)
+    #     f.close()
+    #     print('--> saved final prediction: test_data')
+
+    # def load_doc_emb(self):
+    #     f = file('../emb_doc.save', 'rb')
+    #     result = cPickle.load(f)
+    #     f.close()
+    #     return result
+
+    def save_doc_emb(self, doc_emb):
+        # TODO: change cPickle
+        f = open('%s/%s/emb_doc_train.save' % (self.data_dir, self.data_name), 'wb')
+        # cPickle.dump(doc_emb, f, protocol=cPickle.HIGHEST_PROTOCOL)
+        pickle.dump(result, f)
         f.close()
-        print '-> saved doc embedding testing'
+        print('--> saved doc embedding: train_data')
+
+    def save_doc_emb_test(self, doc_emb):
+        f = open('%s/%s/emb_doc_test.save' % (self.data_dir, self.data_name), 'wb')
+        # cPickle.dump(doc_emb, f, protocol=cPickle.HIGHEST_PROTOCOL)
+        pickle.dump(result, f)
+        f.close()
+        print('--> saved doc embedding: test_data')
 
     def save_pred_test(self, result):
-        f = file('../nsc_pred_test_lstm.save', 'wb')
-        cPickle.dump(result, f, protocol=cPickle.HIGHEST_PROTOCOL)
+        f = open('%s/%s/pred_test_mn.save' % (self.data_dir, self.data_name), 'wb')
+        # cPickle.dump(result, f, protocol=cPickle.HIGHEST_PROTOCOL)
+        pickle.dump(result, f)
         f.close()
-        print '--> saved final prediction: test_data'
+        print('--> saved final prediction: test_data')
 
     def load_doc_emb(self):
-        f = file('../emb_doc.save', 'rb')
-        result = cPickle.load(f)
+        f = open('%s/%s/emb_doc_train.save' % (self.data_dir, self.data_name), 'rb')
+        result = pickle.load(f, encoding='latin1')
+        f.close()
+        return result
+
+    def load_doc_emb_test(self):
+        f = open('%s/%s/emb_doc_test.save' % (self.data_dir, self.data_name), 'rb')
+        result = pickle.load(f, encoding='latin1')
         f.close()
         return result

@@ -2,7 +2,8 @@
 import theano
 import theano.tensor as T
 import numpy
-import cPickle
+import pickle
+# import cPickle
 
 class EmbLayer(object):
     def __init__(self, rng, inp, n_voc, dim, name, dataname,prefix=None):
@@ -10,13 +11,18 @@ class EmbLayer(object):
         self.name = name
 
         if prefix == None:
-            f = file('../../../data/'+dataname+'/embinit.save', 'rb')
-            W = cPickle.load(f)
+            # f = file('../../../data/'+dataname+'/embinit.save', 'rb')
+            f = open('../../../data/'+dataname+'/embinit.save', 'rb')
+            W = pickle.load(f, encoding='latin1')
             f.close()
+            # W = cPickle.load(f)
+            # f.close()
             W = theano.shared(value=W, name='E', borrow=True)    
         else:
-            f = file(prefix + name + '.save', 'rb')
-            W = cPickle.load(f)
+            # f = file(prefix + name + '.save', 'rb')
+            f = open(prefix + name + '.save', 'rb')
+            # W = cPickle.load(f)
+            W = pickle.load(f, encoding='latin1')
             f.close()
         self.W = W
 
@@ -24,7 +30,9 @@ class EmbLayer(object):
         self.params = [self.W]
 
     def save(self, prefix):
-        f = file(prefix + self.name + '.save', 'wb')
+        # f = file(prefix + self.name + '.save', 'wb')
+        f = open(prefix + self.name + '.save', 'wb')
         for obj in self.params:
-            cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
+            pickle.dump(obj, f)
+            # cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
         f.close()

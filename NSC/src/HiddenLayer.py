@@ -2,7 +2,8 @@
 import theano
 import theano.tensor as T
 import numpy
-import cPickle
+# import cPickle
+import pickle
 
 class HiddenLayer(object):
     def __init__(self, rng, input, n_in, n_out, name, prefix=None,
@@ -27,8 +28,10 @@ class HiddenLayer(object):
             b = theano.shared(value=b_values, name='b', borrow=True)
         else:
             f = file(prefix + name + '.save', 'rb')
-            W = cPickle.load(f)
-            b = cPickle.load(f)
+            # W = cPickle.load(f)
+            # b = cPickle.load(f)
+            W = pickle.load(f)
+            b = pickle.load(f)
             f.close()
 
         self.W = W
@@ -45,5 +48,6 @@ class HiddenLayer(object):
     def save(self, prefix):
         f = file(prefix + self.name + '.save', 'wb')
         for obj in self.params:
-            cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
+            pickle.dump(obj, f)
+            # cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
         f.close()

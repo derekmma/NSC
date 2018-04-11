@@ -15,7 +15,7 @@ def AdaUpdates(parameters, gradients, rho, eps):
 
 	deltas_sq_new = [ rho*d_sq + (np.float32(1)-rho)*(d*d) for d_sq,d in zip(deltas_sq,deltas) ]
 
-	gradient_sq_updates = zip(gradients_sq,gradients_sq_new)
-	deltas_sq_updates = zip(deltas_sq,deltas_sq_new)
+	gradient_sq_updates = list(zip(gradients_sq,gradients_sq_new))
+	deltas_sq_updates = list(zip(deltas_sq,deltas_sq_new))
 	parameters_updates = [ (p,p - d) for p,d in zip(parameters,deltas) ]
 	return gradient_sq_updates + deltas_sq_updates + parameters_updates

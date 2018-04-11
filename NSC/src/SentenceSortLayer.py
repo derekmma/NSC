@@ -7,7 +7,7 @@ class SentenceSortLayer(object):
     def __init__(self, input,maxsentencenum):
         self.input = input
         [sentencelen,emblen] = T.shape(input)
-        output = input.reshape((sentencelen / maxsentencenum,maxsentencenum,emblen))
+        output = input.reshape((sentencelen // maxsentencenum,maxsentencenum,emblen))
         output = output.dimshuffle(1,0,2)
         self.output = output
         self.params = []
