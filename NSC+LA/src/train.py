@@ -17,7 +17,7 @@ model = LSTMModel(voc.size,trainset, devset, dataname, classes, None)
 model.train(100)
 print '****************************************************************************'
 print 'test 1'
-result = model.test()
+currentresult = model.test()
 print '****************************************************************************'
 print '\n'
 for i in xrange(1,400):
@@ -27,12 +27,15 @@ for i in xrange(1,400):
 	newresult=model.test()
 	print '****************************************************************************'
 	print '\n'
-	if newresult[0]>result[0] :
-		result=newresult
+	print newresult[0]
+	print currentresult[0]
+	if newresult[0]>currentresult[0]:
+		currentresult=newresult
+		# save document representation for dataset
 		model.save('../model/'+dataname+'/bestmodel')
-        # save document representation for dataset
-        model.save_doc_emb(model.doc_emb)
-        model.save_doc_emb_test(model.doc_emb_test)
-        print 'better accuracy! saved doc_emb and model'
+		model.save_doc_emb(model.doc_emb)
+		model.save_doc_emb_test(model.doc_emb_test)
+		model.save_pred_test(model.pred_test)
+		print 'better accuracy! saved doc_emb and model'
 print 'bestmodel saved!'
 
